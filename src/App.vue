@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" style="margin-left: 320px ;">
     <Products />
   </div>
 </template>

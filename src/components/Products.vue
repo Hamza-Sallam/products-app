@@ -129,6 +129,9 @@ export default {
           this.products = response.data;
           this.error = null; // Clear error if successful
           this.showProducts = true; // Show product list after fetching
+          this.showAddForm=false;
+          this.showUpdateForm=false;
+          this.showDeleteForm=false;
         })
         .catch(error => {
           this.error = "Failed to load products: " + error.message;
@@ -211,9 +214,10 @@ export default {
 
 <style scoped>
 .container {
-  width: 80%;
+  width: 100%;
   margin: 0 auto;
   padding: 20px;
+
 
 }
 
