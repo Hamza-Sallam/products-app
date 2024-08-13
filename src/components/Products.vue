@@ -19,13 +19,13 @@
         <h2>Products</h2>
         <ul>
           <li v-for="product in products" :key="product.id" class="product-item">
-            <strong> Name: {{ product.name }}</strong> <br>Price: {{ product.price }}$ <br> Description: {{ product.description}} 
+            <strong> ID: {{ product.id }}</strong><br><strong> Name: {{ product.name }}</strong> <br>Price: {{ product.price }}$ <br> Description: {{ product.description}} <br> Image: {{ product.image}}
           </li>
         </ul>
       </div>
       
       <!-- Add Product Form -->
-      <div v-if="showAddForm" class="form-section">
+      <div v-if="showAddForm" class="form-section">a
         <h2>Add Product</h2>
         <form @submit.prevent="addProduct" class="form">
           <div class="form-group">
@@ -86,11 +86,11 @@
           </div>
           <button type="submit" class="btn btn-danger">Delete Product</button>
         </form>
-      </div>
-      <div class="status">
-        <p>Total products: {{ products.length }}</p>
-      </div>
-    </div>
+        </div>
+        <p v-if = "showCount ">Total products: {{ products.length }}</p>
+        <p v-if = "showStatus " class="done">Done..</p>
+   
+  </div>
   </div>
 </template>
 
@@ -119,19 +119,23 @@ export default {
       showUpdateForm: false,
       showDeleteForm: false,
       showProducts: false, 
+      showCount: false,
+      showStatus: false,
       error: null 
     };
   },
   methods: {
     fetchProducts() {
-      axios.get('http://localhost:9090/api/products?page=0&size=100000')
+      axios.get('http://localhost:9090/api/products')
         .then(response => {
           this.products = response.data;
           this.error = null; // Clear error if successful
           this.showProducts = true; // Show product list after fetching
+          this.showCount = true; // Show total count of products after fetching
           this.showAddForm=false;
           this.showUpdateForm=false;
           this.showDeleteForm=false;
+          this.showStatus = true; // Show success message after fetching
         })
         .catch(error => {
           this.error = "Failed to load products: " + error.message;
@@ -140,31 +144,27 @@ export default {
     addProduct() {
       axios.post('http://localhost:9090/api/products', this.newProduct)
         .then(response => {
-          this.products.push(response.data);
-          this.newProduct = { name: '', description: '', price: null, image: '' };
-          
+          this.newProduct = { name: '', description: '', price: null, image: '' }; //reset values
           this.error = null; // Clear error if successful
+          this.showStatus=true; 
         })
         .catch(error => {
           this.error = "Failed to add products: " + error.message;
         });
     },
     updateProduct() {
-      const productData = { 
+      const productData = {  //create a new product with the user input
         name: this.updateProductData.name, 
         description: this.updateProductData.description, 
         price: this.updateProductData.price,
-        image: this.updateProductData.image, // Keep the existing image if not provided by the user 
+        image: this.updateProductData.image, 
       };
       
       axios.put(`http://localhost:9090/api/products/${this.updateProductData.id}`, productData)
         .then(response => {
-
-          response.data;
-
           this.updateProductData = { id: null, name: '', description: '', price: null, image: ''};
-          this.showUpdateForm = false;
           this.error = null;
+          this.showStatus=true;
         })
         .catch(error => {
           this.error = "Failed to update products: " + error.message;
@@ -174,8 +174,8 @@ export default {
       axios.delete(`http://localhost:9090/api/products/${this.deleteProductId}`)
         .then(response => {
           this.deleteProductId = null;
-          this.showDeleteForm = false;
           this.error = null; // Clear error if successful
+          this.showStatus=true;
         })
         .catch(error => {
           this.error = "Failed to delete products: \n" + error.message;
@@ -186,26 +186,25 @@ export default {
       this.showUpdateForm = false;
       this.showDeleteForm = false;
       this.showProducts = false;
+      this.showCount = false;
+      this.showStatus=false;
     },
     toggleUpdateProductForm() {
       this.showUpdateForm = !this.showUpdateForm;
       this.showAddForm = false;
       this.showDeleteForm = false;
       this.showProducts = false;
+      this.showCount = false;
+      this.showStatus=false;
     },
     toggleDeleteProductForm() {
       this.showDeleteForm = !this.showDeleteForm;
       this.showAddForm = false;
       this.showUpdateForm = false;
       this.showProducts = false;
+      this.showCount = false;
+      this.showStatus=false;
     },
-    handleApiError(error) {
-      if (error.response && error.response.data) {
-        this.error = `Error: ${error.response.data}`;
-      } else {
-        this.error = `Error: ${error.message}`;
-      }
-    }
   },
   mounted() {
   }
@@ -227,6 +226,7 @@ h1 {
   text-align: center;
   color: #42b983;
   margin-bottom: 30px;
+  font-size: 60px;
 }
 
 .alert {
@@ -304,6 +304,14 @@ li::marker{
 .btn-danger {
   background-color: #dc3545;
 }
+.done{
+  color: green;
+  font-weight: bold;
+  animation: fadeOut 1.5s ease-in-out forwards;
+}
 
-
+@keyframes fadeOut {
+  0% { opacity: 1; }
+  100% { opacity: 0; display: none; }
+}
 </style>
